@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pylab as plt
 import os
 import ripper as rp
 
@@ -70,13 +69,14 @@ class Shot:
         ip_idx = 1
         return np.sort(self.data[ip_idx][1])[-100:-1].mean()
 
+    ''' requires matplotlib to work, is not currently used
     def plot(self, idx, fig_num=None, color='k'):
         plt.figure(fig_num)
         plt.grid(True)
         plt.xlabel("t, ms")
         plt.ylabel(self.unit[idx])
         plt.title(self.names[idx])
-        plt.plot(self.data[idx][0], self.data[idx][1], color=color)
+        plt.plot(self.data[idx][0], self.data[idx][1], color=color)'''
 
     def get_data(self, columns):
         data = []
