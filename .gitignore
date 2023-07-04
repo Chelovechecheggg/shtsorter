@@ -1,3 +1,7 @@
-sht/*
-output.txt
-unk_output.txt
+*
+!sht_mgd_zero.py
+!ripper.py
+!test.exe
+!run
+!.idea/*
+!requirements.txt

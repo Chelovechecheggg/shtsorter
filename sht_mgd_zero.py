@@ -1,16 +1,8 @@
-'''
-INPUT:
-path_to_file number diagn_name1,diagn_name2,... cond cond_val
-Example:
-    ".\sht" 40073 "МГД  зонд T2","continuum" "<" 0.4
-Possible conditions:
-    "<" ">"
-'''
-
 import numpy as np
 import matplotlib.pylab as plt
 import os
 import ripper as rp
+
 
 class Shot:
     def __init__(self, number, shtpath, unpack_method):
@@ -282,10 +274,10 @@ def main():
     output = []
     unknowns_output = []
     #numbers = [43135,43136,43137] #manual shot name input
-    numbers = get_numbers("./sht2") #read all shot names from directory
+    numbers = get_numbers("./sht") #read all shot names from directory
     for n in numbers:
         shot = Shot(number=n,
-                    shtpath="./sht2",
+                    shtpath="./sht",
                     unpack_method="exe")
         search_time = Search(shot=shot,
                              names=["Emission electrode current"],
