@@ -2,7 +2,7 @@
 !sht_mgd_zero.py
 !ripper.py
 !test.exe
-!run
+!run.py
 !.idea/*
 !requirements.txt
 !shtsorter.py
