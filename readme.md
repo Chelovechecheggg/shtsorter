@@ -1,6 +1,6 @@
 # shtsorter
 ## Description
-A script made for finding Globus-M2 tokamak shots that meet specific condition.
+A script made for finding Globus-M2 tokamak shots that meet specific conditions.
 Named "shtsorter" because "shtfinder" already exists but does something else
 ## Usage
 Open run.py to configure the search conditions. <p>
