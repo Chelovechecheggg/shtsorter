@@ -22,7 +22,7 @@ not use the diagnostic.<br>
 - **time** - time interval in which the program looks for a signal. in *search_time* should be set to [0,0]
 
 ***search*** is used to actually set the search conditions. Available parameters: <br>
-- **names** - sames as in *search_time*
+- **names** - same as in *search_time*
 - **cond** and **cond_val** - *cond* is either "<" or ">" (for now). The program will look for
 shots with signal value less or greater (depending on *cond*) that *cond_val* in the given
 time interval
