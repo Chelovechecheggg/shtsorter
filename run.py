@@ -4,7 +4,7 @@ from shtsorter import *
 def main():
     output = []
     unknowns_output = []
-    #numbers = [43130] #manual shot name input
+    #numbers = [42155] #manual shot name input
     numbers = get_numbers("./sht2")  # read all shot names from directory
     for n in numbers:
         shot = Shot(number=n,
@@ -13,10 +13,10 @@ def main():
         search_time = Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='>',
-                             cond_val=18,
+                             cond_val=10,
                              filters=[],
                              filt_arg=[],
-                             noise_val=18,
+                             noise_val=10,
                              time=[0, 0])  # input [0,0] to search over entire signal
         t_0 = search_time.get_signal_start_time()
         if t_0 != -1:
@@ -44,8 +44,8 @@ def main():
                              cond='<',
                              cond_val=50,
                              noise_val=0.0,
-                             filters=["der", "avg", "abs"],
-                             filt_arg=["none", "none", "none"],
+                             filters=["der", "avg"],
+                             filt_arg=["none", "none"],
                              time=[t_0, t_0 + 0.010]),
                       Search(shot=shot,
                              names=["МГД наружный", "МГД наружный  ", "МГД наружный   ", "МГД наружный    ",
@@ -71,8 +71,8 @@ def main():
                       Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='>',
-                             cond_val=10,
-                             noise_val=10,
+                             cond_val=3,
+                             noise_val=3,
                              filters=[],
                              filt_arg = [],
                              time=[t_0, t_0 + 0.010]),

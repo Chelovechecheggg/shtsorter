@@ -196,11 +196,11 @@ class Search:
     def apply_filters(self):
         self.processed_data = self.shot.data[self.valid_id][1][self.points[0]:self.points[1]]
         self.processed_time = self.shot.data[self.valid_id][0][self.points[0]:self.points[1]]
-        operator_dict = {"+": np.add, "-": np.subtract, "*": np.multiply, "/": np.divide, "**": np.power}
+        operator_dict = {"+": np.add, "-": np.subtract, "*": np.multiply, "/": np.divide, "^": np.power}
         operator_dict_diagn = {"+diagn": np.add, "-diagn": np.subtract, "*diagn": np.multiply, "/diagn": np.divide,
-                               "**diagn": np.power}
+                               "^diagn": np.power}
         operator_dict_diagn_max = {"+diagn_avg": np.add, "-diagn_avg": np.subtract, "*diagn_avg": np.multiply,
-                                   "/diagn_avg": np.divide, "**diagn_avg": np.power}
+                                   "/diagn_avg": np.divide, "^diagn_avg": np.power}
         for f, f_arg in zip(self.filters, self.filt_arg):
             if f == "abs":
                 self.processed_data = abs(self.processed_data)
@@ -208,7 +208,7 @@ class Search:
                 avg = st.mean(self.processed_data)
                 self.processed_data = np.array([avg])
                 self.processed_time = np.array([0])
-                # print(self.processed_data)
+                print(self.processed_data)
             elif f in operator_dict.keys():
                 oper = operator_dict[f]
                 self.processed_data = oper(self.processed_data, f_arg)
@@ -226,9 +226,10 @@ class Search:
                 self.diagnames = [f_arg]
                 self.find_diagnostics_ids()
                 self.find_valid_id()
-                maxm = max(self.shot.data[self.valid_id][1][self.points[0]:self.points[1]])
-                self.processed_data = oper(self.processed_data,
-                                           maxm)
+                if self.valid_id:
+                    maxm = st.mean(self.shot.data[self.valid_id][1][self.points[0]:self.points[1]])
+                    self.processed_data = oper(self.processed_data,
+                                               maxm)
                 # print(self.processed_data)
 
     def check_condition(self):
