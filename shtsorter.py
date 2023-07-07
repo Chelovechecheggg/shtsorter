@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import ripper as rp
+import statistics as st
 
 
 class Shot:
@@ -96,13 +97,17 @@ class Shot:
 
 
 class Search:
-    def __init__(self, shot, names, cond, cond_val, noise_val, time):
+    def __init__(self, shot, names, cond, cond_val, filters, filt_arg, noise_val, time):
         self.diagnames = names
         self.cond = cond
         self.cond_val = cond_val
         self.shot = shot
         self.res = []
         self.ids = []
+        self.processed_data = np.array([])
+        self.processed_time = np.array([])
+        self.filters = filters
+        self.filt_arg = filt_arg
         self.noise_val = noise_val
         self.valid_id = 0
         self.time = time
@@ -127,12 +132,13 @@ class Search:
         self.find_valid_id()
         if self.valid_id:
             self.set_time_borders()
-            # self.apply_filters()
+            self.apply_filters()
             self.check_condition()
             return
         self.res.append(-1)
 
     def find_valid_id(self):
+        self.valid_id = 0
         for shot_id in self.ids:
             if shot_id and shot_id != -1:
                 diff = abs(max(self.shot.data[shot_id][1]) - min(self.shot.data[shot_id][1]))
@@ -142,6 +148,7 @@ class Search:
 
     def find_diagnostics_ids(self):
         i = 0
+        self.ids = []
         for searchname in self.diagnames:
             found_name_flag = 0
             for shotname in self.shot.names:
@@ -186,9 +193,48 @@ class Search:
             self.time = [0, max(self.shot.data[self.valid_id][0])]
             self.set_time_borders()
 
+    def apply_filters(self):
+        self.processed_data = self.shot.data[self.valid_id][1][self.points[0]:self.points[1]]
+        self.processed_time = self.shot.data[self.valid_id][0][self.points[0]:self.points[1]]
+        operator_dict = {"+": np.add, "-": np.subtract, "*": np.multiply, "/": np.divide, "^": np.power}
+        operator_dict_diagn = {"+diagn": np.add, "-diagn": np.subtract, "*diagn": np.multiply, "/diagn": np.divide,
+                               "^diagn": np.power}
+        operator_dict_diagn_max = {"+diagn_avg": np.add, "-diagn_avg": np.subtract, "*diagn_avg": np.multiply,
+                                   "/diagn_avg": np.divide, "^diagn_avg": np.power}
+        for f, f_arg in zip(self.filters, self.filt_arg):
+            if f == "abs":
+                self.processed_data = abs(self.processed_data)
+            if f == "avg":
+                avg = st.mean(self.processed_data)
+                self.processed_data = np.array([avg])
+                self.processed_time = np.array([0])
+                print(self.processed_data)
+            elif f in operator_dict.keys():
+                oper = operator_dict[f]
+                self.processed_data = oper(self.processed_data, f_arg)
+            elif f == "der":
+                self.processed_data = np.gradient(self.processed_data)
+            elif f in operator_dict_diagn.keys():
+                oper = operator_dict_diagn[f]
+                self.diagnames = [f_arg]
+                self.find_diagnostics_ids()
+                self.find_valid_id()
+                self.processed_data = oper(self.processed_data,
+                                           self.shot.data[self.valid_id][1][self.points[0]:self.points[1]])
+            elif f in operator_dict_diagn_max.keys():
+                oper = operator_dict_diagn_max[f]
+                self.diagnames = [f_arg]
+                self.find_diagnostics_ids()
+                self.find_valid_id()
+                if self.valid_id:
+                    maxm = st.mean(self.shot.data[self.valid_id][1][self.points[0]:self.points[1]])
+                    self.processed_data = oper(self.processed_data,
+                                               maxm)
+                # print(self.processed_data)
+
     def check_condition(self):
-        shot_id = self.valid_id
-        maximum = max(abs(self.shot.data[shot_id][1][self.points[0]:self.points[1]]))
+        maximum = max(self.processed_data)
+        minimum = min(self.processed_data)
         if self.cond == '<':
             # print(maximum)
             if maximum < self.cond_val:
@@ -197,7 +243,7 @@ class Search:
                 self.res.append(0)
         if self.cond == '>':
             # print(maximum)
-            if maximum > self.cond_val:
+            if minimum > self.cond_val:
                 self.res.append(1)
             else:
                 self.res.append(0)

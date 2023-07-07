@@ -4,16 +4,18 @@ from shtsorter import *
 def main():
     output = []
     unknowns_output = []
-    # numbers = [43135,43136,43137] #manual shot name input
-    numbers = get_numbers("./sht")  # read all shot names from directory
+    #numbers = [42155] #manual shot name input
+    numbers = get_numbers("./sht2")  # read all shot names from directory
     for n in numbers:
         shot = Shot(number=n,
-                    shtpath="./sht",
+                    shtpath="./sht2",
                     unpack_method="exe")
         search_time = Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='>',
                              cond_val=10,
+                             filters=[],
+                             filt_arg=[],
                              noise_val=10,
                              time=[0, 0])  # input [0,0] to search over entire signal
         t_0 = search_time.get_signal_start_time()
@@ -31,7 +33,19 @@ def main():
                                     "МГД быстрый зонд тор. ", "МГД быстрый зонд верт. ", "МГД быстрый зонд рад. "],
                              cond='<',
                              cond_val=0.4,
+                             filters=["abs"],
+                             filt_arg=["none"],
                              noise_val=0.4,
+                             time=[t_0, t_0 + 0.010]),
+                      Search(shot=shot,
+                             names=["Ip новый (Пр1ВК) (инт.16)", "Ip внутр.(Пр2ВК) (инт.18)",
+                                    "Ip+Ivv нар.(Пр1ВК) (инт.16)",
+                                    "Ip внутр.(Пр2ВК) (инт.18)"],
+                             cond='<',
+                             cond_val=50,
+                             noise_val=0.0,
+                             filters=["der", "avg"],
+                             filt_arg=["none", "none"],
                              time=[t_0, t_0 + 0.010]),
                       Search(shot=shot,
                              names=["МГД наружный", "МГД наружный  ", "МГД наружный   ", "МГД наружный    ",
@@ -39,6 +53,8 @@ def main():
                                     "МГД наружный        ", ],
                              cond='<',
                              cond_val=0.4,
+                             filters=["abs"],
+                             filt_arg=["none"],
                              noise_val=0.4,
                              time=[t_0, t_0 + 0.010]),
 
@@ -49,6 +65,24 @@ def main():
                              cond='>',
                              cond_val=100_000,
                              noise_val=0.3,
+                             filters=[],
+                             filt_arg=[],
+                             time=[t_0, t_0 + 0.010]),
+                      Search(shot=shot,
+                             names=["Emission electrode current"],
+                             cond='>',
+                             cond_val=3,
+                             noise_val=3,
+                             filters=[],
+                             filt_arg = [],
+                             time=[t_0, t_0 + 0.010]),
+                      Search(shot=shot,
+                             names=["Emission electrode current"],
+                             cond='<',
+                             cond_val=0.00148,
+                             noise_val=0,
+                             filters=["+", "avg", "/diagn_avg"],
+                             filt_arg=[9.995, "none", "Emission electrode voltage"],
                              time=[t_0, t_0 + 0.010])
                       ]
 
