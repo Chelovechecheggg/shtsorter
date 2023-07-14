@@ -4,8 +4,8 @@ from shtsorter import *
 def main():
     output = []
     unknowns_output = []
-    #numbers = [42155] #manual shot name input
-    numbers = get_numbers("./sht2")  # read all shot names from directory
+    numbers = [42687] #manual shot name input
+    #numbers = get_numbers("./sht2")  # read all shot names from directory
     for n in numbers:
         shot = Shot(number=n,
                     shtpath="./sht2",
