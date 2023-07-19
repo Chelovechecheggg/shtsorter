@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import ripper as rp
@@ -220,7 +221,10 @@ class Search:
                 oper = operator_dict[f]
                 self.processed_data = oper(self.processed_data, f_arg)
             elif f == "der":
+                plt.plot(self.processed_time, self.processed_data)
                 self.processed_data = np.gradient(self.processed_data)
+                plt.plot(self.processed_time, self.processed_data)
+                plt.show()
             elif f in operator_dict_diagn.keys():
                 oper = operator_dict_diagn[f]
                 self.diagnames = [f_arg]
@@ -238,7 +242,8 @@ class Search:
                     self.processed_data = oper(self.processed_data,
                                                maxm)
             elif f == "diff":
-                self.processed_data = self.processed_data[self.points[1]]-self.processed_data[self.points[0]]
+                self.processed_data = np.array([self.processed_data[-1]-self.processed_data[0]])
+                self.processed_time = np.array([0])
             elif f == "sawtooth":
                 pass  # WIP
             elif f == "stft_freq":
@@ -261,6 +266,13 @@ class Search:
                 self.points[1] = len(self.processed_data)-1
                 if n_min == -1:
                     print("Error during STFT in shot", self.shot.number, "*very* invalid frequency given ")
+            elif f == "smooth":
+                plt.plot(self.processed_time, self.processed_data)
+                self.processed_data = sp.signal.savgol_filter(x=self.processed_data,
+                                                             window_length=int(len(self.processed_data)/2),
+                                                             polyorder=4)
+                plt.plot(self.processed_time, self.processed_data)
+                plt.show()
 
     def check_condition(self):
         maximum = max(self.processed_data)
@@ -277,6 +289,19 @@ class Search:
                 self.res.append(1)
             else:
                 self.res.append(0)
+        if self.cond == '>once':
+            for val in self.processed_data:
+                if val > self.cond_val:
+                    self.res.append(1)
+                    return
+            self.res.append(0)
+        if self.cond == '<once':
+            for val in self.processed_data:
+                if val < self.cond_val:
+                    self.res.append(1)
+                    return
+            self.res.append(0)
+
 
     def find_signal_start_time(self):
         i = 0
