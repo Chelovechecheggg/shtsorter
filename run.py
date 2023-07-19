@@ -4,6 +4,7 @@ from shtsorter import *
 def main():
     output = []
     unknowns_output = []
+    used_exe = []
     numbers = [42674] # manual shot name input
     # numbers = get_numbers("./sht2")  # read all shot names from directory
     for n in numbers:
@@ -86,13 +87,15 @@ def main():
                              time=[t_0, t_0 + 0.010])
                       ]
 
-            output, unknowns_output = make_output(search, shot, output, unknowns_output)
+            output, unknowns_output, used_exe = make_output(search, shot, output, unknowns_output, used_exe)
         else:
             print("no emission found", shot.number)
     print("fits all:", output)
     np.savetxt("output.txt", output, fmt="%.5i")
     print("unknown:", unknowns_output)
     np.savetxt("unk_output.txt", unknowns_output, fmt="%.5i")
+    print("used exe unpack method:", used_exe)
+    np.savetxt("exe_output.txt", used_exe, fmt="%.5i")
 
 
 if __name__ == "__main__":
