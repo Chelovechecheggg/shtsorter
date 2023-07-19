@@ -13,7 +13,7 @@ however it takes ~2 minutes to read one .sht file. <p>
 ***search_time*** is used to set time interval relative to a signal from a diagnostic. Available parameters: <br>
 - **names** - names of the diagnostics to look for. Uses the first diagnostic that is found
 in a shot file. <br>
-- **cond** and **cond_val** - *cond* is either "<" or ">" (for now). The program will look at which
+- **cond** and **cond_val** - *cond* is either "<" or ">". The program will look at which
 time point the signal becomes less or greater (depending on *cond*) than *cond_val* and will set
 variable t_0 to that time.<br>
 - **noise_val** - the value that determines empty signals. If the difference between maximum and minimum
@@ -24,9 +24,10 @@ not use the diagnostic.<br>
 
 ***search*** is used to actually set the search conditions. Available parameters: <br>
 - **names** - same as in *search_time*
-- **cond** and **cond_val** - *cond* is either "<" or ">" (for now). The program will look for
-shots with signal value less or greater (depending on *cond*) that *cond_val* in the given
-time interval
+- **cond** and **cond_val** - *cond* can be "<", ">", "<once", ">once". The program will look for
+shots where all values of a signal is less or greater (if *cond* is "<" or ">" respectively) that *cond_val* in the given
+time interval. If *cond* is "<once" or ">once" the program will look for shots where at least one point in the signal
+is less than/greater than *cond_val* (respectively)
 - **noise_val** - same as in *search_time*
 - **time** - same as in *search_time*. Here the variable t_0 can be used to set the time interval
 relative to a signal from a diagnostic signal specified in *search_time* <br>
@@ -59,4 +60,11 @@ power of (respectively) a signal from a different diagnostic
 power of (respectively) the average value of signal from a different diagnostic on the given time interval.
     - Argument: list with names of the diagnostics. The operation will be performed with the first 
   valid(existing with non-noise signal) diagnostic in the list
+- **"stft_freq"** - computes short time Fourier transform of the signal and returns magnitude change over time of
+the signal on the given frequency
+    - Argument: integer, the frequency mentioned above.
+    - **Should be used only with "shtripper" unpack method.** "exe" unpack method returns inconsistent data or errors
+  due to low number of data points 
+- **"smooth"** - smoothes the signal using Savitzky-Golay algorithm
+    - No arguments required: insert "none" as the argument 
   

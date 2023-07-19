@@ -1,7 +1,9 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 import ripper as rp
 import statistics as st
+import scipy as sp
 
 
 class Shot:
@@ -52,17 +54,23 @@ class Shot:
                 print(e)
 
         elif self.unpack_method == "shtripper":
-            self.names = []
-            self.info = []
-            self.unit = []
-            self.data = []
-            var = rp.extract(self.shtpath, self.number)
-            for key in var:
-                self.names.append(var[key]["name"])
-                self.info.append(var[key]["comm"])
-                self.unit.append(var[key]["unit"])
-                oscillo = np.asarray(rp.x_y(var[key]))
-                self.data.append(oscillo)
+            try:
+                self.names = []
+                self.info = []
+                self.unit = []
+                self.data = []
+                var = rp.extract(self.shtpath, self.number)
+                for key in var:
+                    self.names.append(var[key]["name"])
+                    self.info.append(var[key]["comm"])
+                    self.unit.append(var[key]["unit"])
+                    oscillo = np.asarray(rp.x_y(var[key]))
+                    self.data.append(oscillo)
+            except Exception as e:
+                print(e)
+                print("In shot", self.number, "shtripper unpack method didnt work. Using exe method instead...")
+                self.unpack_method = "exe"
+                self.read()
         else:
             raise NameError('No such unpack_method')
 
@@ -213,7 +221,10 @@ class Search:
                 oper = operator_dict[f]
                 self.processed_data = oper(self.processed_data, f_arg)
             elif f == "der":
+                plt.plot(self.processed_time, self.processed_data)
                 self.processed_data = np.gradient(self.processed_data)
+                plt.plot(self.processed_time, self.processed_data)
+                plt.show()
             elif f in operator_dict_diagn.keys():
                 oper = operator_dict_diagn[f]
                 self.diagnames = [f_arg]
@@ -230,7 +241,38 @@ class Search:
                     maxm = st.mean(self.shot.data[self.valid_id][1][self.points[0]:self.points[1]])
                     self.processed_data = oper(self.processed_data,
                                                maxm)
-                # print(self.processed_data)
+            elif f == "diff":
+                self.processed_data = np.array([self.processed_data[-1]-self.processed_data[0]])
+                self.processed_time = np.array([0])
+            elif f == "sawtooth":
+                pass  # WIP
+            elif f == "stft_freq":
+                freq = f_arg[0]
+                stft_freq, t, zxx = sp.signal.stft(x=self.processed_data, nperseg=f_arg[1], noverlap=f_arg[2],
+                                                   nfft=f_arg[3], fs=f_arg[4])
+                # print(zxx)
+                if freq > max(stft_freq):
+                    print("Warning during STFT in shot", self.shot.number, ": given frequency is larger than max"
+                                                                           "stft frequency")
+                stft_freq = abs(stft_freq-freq)
+                s_fr_min = 9999999
+                n_min = -1
+                for n, s_fr in zip(range(len(stft_freq)), stft_freq):
+                    if s_fr < s_fr_min:
+                        n_min = n
+                        s_fr_min = s_fr
+                self.processed_data = abs(zxx[n_min])
+                self.points[0] = 0
+                self.points[1] = len(self.processed_data)-1
+                if n_min == -1:
+                    print("Error during STFT in shot", self.shot.number, "*very* invalid frequency given ")
+            elif f == "smooth":
+                plt.plot(self.processed_time, self.processed_data)
+                self.processed_data = sp.signal.savgol_filter(x=self.processed_data,
+                                                             window_length=int(len(self.processed_data)/2),
+                                                             polyorder=4)
+                plt.plot(self.processed_time, self.processed_data)
+                plt.show()
 
     def check_condition(self):
         maximum = max(self.processed_data)
@@ -247,6 +289,19 @@ class Search:
                 self.res.append(1)
             else:
                 self.res.append(0)
+        if self.cond == '>once':
+            for val in self.processed_data:
+                if val > self.cond_val:
+                    self.res.append(1)
+                    return
+            self.res.append(0)
+        if self.cond == '<once':
+            for val in self.processed_data:
+                if val < self.cond_val:
+                    self.res.append(1)
+                    return
+            self.res.append(0)
+
 
     def find_signal_start_time(self):
         i = 0

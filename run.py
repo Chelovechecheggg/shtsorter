@@ -4,8 +4,8 @@ from shtsorter import *
 def main():
     output = []
     unknowns_output = []
-    #numbers = [42155] #manual shot name input
-    numbers = get_numbers("./sht2")  # read all shot names from directory
+    numbers = [42674] # manual shot name input
+    # numbers = get_numbers("./sht2")  # read all shot names from directory
     for n in numbers:
         shot = Shot(number=n,
                     shtpath="./sht2",
@@ -42,10 +42,10 @@ def main():
                                     "Ip+Ivv нар.(Пр1ВК) (инт.16)",
                                     "Ip внутр.(Пр2ВК) (инт.18)"],
                              cond='<',
-                             cond_val=50,
+                             cond_val=25000,
                              noise_val=0.0,
-                             filters=["der", "avg"],
-                             filt_arg=["none", "none"],
+                             filters=["diff"],
+                             filt_arg=["none"],
                              time=[t_0, t_0 + 0.010]),
                       Search(shot=shot,
                              names=["МГД наружный", "МГД наружный  ", "МГД наружный   ", "МГД наружный    ",
