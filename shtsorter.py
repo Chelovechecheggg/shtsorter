@@ -15,6 +15,7 @@ class Shot:
         self.info = []
         self.unit = []
         self.data = []
+        self.ripper_fail_flag = 0
         self.read()
 
     def read(self):
@@ -70,6 +71,7 @@ class Shot:
                 print(e)
                 print("In shot", self.number, "shtripper unpack method didnt work. Using exe method instead...")
                 self.unpack_method = "exe"
+                self.ripper_fail_flag = 1
                 self.read()
         else:
             raise NameError('No such unpack_method')
@@ -84,14 +86,13 @@ class Shot:
         ip_idx = 1
         return np.sort(self.data[ip_idx][1])[-100:-1].mean()
 
-    ''' requires matplotlib to work, is not currently used
     def plot(self, idx, fig_num=None, color='k'):
         plt.figure(fig_num)
         plt.grid(True)
         plt.xlabel("t, ms")
         plt.ylabel(self.unit[idx])
         plt.title(self.names[idx])
-        plt.plot(self.data[idx][0], self.data[idx][1], color=color)'''
+        plt.plot(self.data[idx][0], self.data[idx][1], color=color)
 
     def get_data(self, columns):
         data = []
@@ -221,10 +222,7 @@ class Search:
                 oper = operator_dict[f]
                 self.processed_data = oper(self.processed_data, f_arg)
             elif f == "der":
-                plt.plot(self.processed_time, self.processed_data)
                 self.processed_data = np.gradient(self.processed_data)
-                plt.plot(self.processed_time, self.processed_data)
-                plt.show()
             elif f in operator_dict_diagn.keys():
                 oper = operator_dict_diagn[f]
                 self.diagnames = [f_arg]
@@ -267,12 +265,9 @@ class Search:
                 if n_min == -1:
                     print("Error during STFT in shot", self.shot.number, "*very* invalid frequency given ")
             elif f == "smooth":
-                plt.plot(self.processed_time, self.processed_data)
                 self.processed_data = sp.signal.savgol_filter(x=self.processed_data,
                                                              window_length=int(len(self.processed_data)/2),
                                                              polyorder=4)
-                plt.plot(self.processed_time, self.processed_data)
-                plt.show()
 
     def check_condition(self):
         maximum = max(self.processed_data)
@@ -344,7 +339,7 @@ def mgd_print_test(shot, columns):
             print(data[i][0][j], data[i][1][j])
 
 
-def make_output(search, shot, output, unknown):
+def make_output(search, shot, output, unknown, used_exe):
     unk_flag = 0
     for s in search:
         try:
@@ -355,16 +350,18 @@ def make_output(search, shot, output, unknown):
             elif s.res == [-1]:
                 unk_flag = 1
             else:
-                return output, unknown
+                return output, unknown, used_exe
         except Exception as e:
             print(e)
             print("Error during search while reading shot file", shot.number, "Empty shot?")
             unk_flag = -1
-    if unk_flag == 0:
+    if unk_flag == 0 and shot.ripper_fail_flag == 0:
         output.append(shot.number)
-    else:
+    elif unk_flag == 1 and shot.ripper_fail_flag == 0:
         unknown.append(shot.number)
-    return output, unknown
+    elif shot.ripper_fail_flag == 1:
+        used_exe.append(shot.number)
+    return output, unknown, used_exe
 
 
 def get_numbers(path):
