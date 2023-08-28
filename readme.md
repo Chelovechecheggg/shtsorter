@@ -3,14 +3,20 @@
 A script made for finding Globus-M2 tokamak shots that meet specific conditions.
 Named "shtsorter" because "shtfinder" already exists but does something else
 ## Usage
-Open run.py to configure the search conditions. If you're using a run file with a name different than "run.py",
-change the argument of make_headers() (first line of main()) function to the current name of the run file. <p>
+Open run.py to configure the search conditions.
 Description of all the available settings and search conditions is provided below <p>
+**makeheaders** function is used for making headers for output files. First argument should be the name of the run file
+("run.py" by default), and the second argument is the name of the output file (must match the *searchname* in the shot
+configuration below)
 ***Shot*** class is created to read all data from a shot. Available parameters: <br>
 - **shtpath** - path to the folder that contains all the .sht files. If changed, also change it in the get_numbers function <br>
 - **unpack_method** - either "exe" or "shtripper". "exe" is used for faster file reading (~2-3s to read one .sht file),
 however not every data point is used<br>, which may lead to missing short spikes in the signal. "shtripper" reads all data points,
-however it takes ~2 minutes to read one .sht file. <p>
+however it takes ~2 minutes to read one .sht file.
+- **searchname** - string that will be used to name all output files. Must match *search_name* in the
+*make_headers* function.<p>
+**THE PROGRAM CLEARS OUTPUT FILES WITH THE SAME SEARCHNAME WHEN LAUNCHING. MAKE SURE TO SAVE ALL INFO THAT YOU NEED FROM
+THOSE FILES OR TO CHANGE THE SEARCHNAME BEFORE LAUNCHING THE PROGRAM AGAIN**<p>
 
 ***search_time*** is used to set time interval relative to a signal from a diagnostic. Available parameters: <br>
 - **names** - names of the diagnostics to look for. Uses the first diagnostic that is found
@@ -48,8 +54,7 @@ folder very rarely, and they should be analyzed manually. *output_exe* is only u
 If an error occurs when unpacking with *shtripper* method (which sometimes happens for some reason),
 the *exe* method will be used instead. If then a shot passes all checks, it will be saved to *output_exe* file instead
 of *output*<p>
-**THE PROGRAM CLEARS ALL THE OUTPUT FILES WHEN LAUNCHING. MAKE SURE TO SAVE ALL INFO THAT YOU NEED FROM THOSE FILES
-BEFORE LAUNCHING THE PROGRAM AGAIN**
+
 ## Filters 
 Filters are used to search not only for signal values themselves, 
 but also for other information contained in a signal, like average values or rate of growth.

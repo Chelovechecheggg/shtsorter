@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 class Shot:
-    def __init__(self, number, shtpath, unpack_method):
+    def __init__(self, number, shtpath, unpack_method, searchname):
         self.number = number
         self.shtpath = shtpath
         self.unpack_method = unpack_method
@@ -19,6 +19,7 @@ class Shot:
         self.data = []
         self.ripper_fail_flag = 0
         self.read()
+        self.search_name = str(searchname)
 
     def read(self):
         if self.unpack_method == "exe":
@@ -72,7 +73,7 @@ class Shot:
             except Exception as e:
                 print(e)
                 print("In shot", self.number, "shtripper unpack method didnt work. Using exe method instead...")
-                f_log = open("log.txt", "a")
+                f_log = open(f"out/{self.search_name}log.txt", "a")
                 f_log.write(str(e) + "\n")
                 f_log.write("In shot " + str(self.number) + " shtripper unpack method didnt work. Using exe "
                             "method instead..." + "\n")
@@ -108,7 +109,7 @@ class Shot:
                 data.append(self.data[col])
             except Exception as e:
                 print(e)
-                f_log = open("log.txt", "a")
+                f_log = open(f"out/{self.search_name}log.txt", "a")
                 f_log.write(str(e) + "\n")
                 f_log.close()
                 data.append(np.zeros([9, 4096]))
@@ -131,7 +132,7 @@ class Search:
         self.valid_id = 0
         self.time = time
         self.points = [0, 0]
-        self.f_log = open("log.txt", "a")
+        self.f_log = open(f"out/{shot.search_name}log.txt", "a")
 
     def get_signal_start_time(self):
         try:
@@ -361,9 +362,9 @@ def mgd_print_test(shot, columns):
 
 def make_output(search, shot, output, unknown, used_exe):
     unk_flag = 0
-    f_output = open("output.txt", "a")
-    f_unk = open("output_unk.txt", "a")
-    f_exe = open("output_exe.txt", "a")
+    f_output = open(f"out/{shot.search_name}output.txt", "a")
+    f_unk = open(f"out/{shot.search_name}output_unk.txt", "a")
+    f_exe = open(f"out/{shot.search_name}output_exe.txt", "a")
     for s in search:
         try:
             s.do_search()
@@ -405,18 +406,18 @@ def get_numbers(path):
     return numbers
 
 
-def make_headers(runname):
+def make_headers(runname,search_name):
     try:
-        os.remove("output.txt")
-        os.remove("output_unk.txt")
-        os.remove("output_exe.txt")
+        os.remove(f"out/{search_name}output.txt")
+        os.remove(f"out/{search_name}output_unk.txt")
+        os.remove(f"out/{search_name}output_exe.txt")
     except:
         pass
 
-    f_log = open("log.txt", "a")
-    f_out = open("output.txt", "a")
-    f_unk = open("output_unk.txt", "a")
-    f_exe = open("output_exe.txt", "a")
+    f_log = open(f"out/{search_name}log.txt", "a")
+    f_out = open(f"out/{search_name}output.txt", "a")
+    f_unk = open(f"out/{search_name}output_unk.txt", "a")
+    f_exe = open(f"out/{search_name}output_exe.txt", "a")
     f_run = open(runname, "r")
     header = f_run.read()
     header_start = 0
@@ -436,4 +437,3 @@ def make_headers(runname):
     f_out.close()
     f_unk.close()
     f_exe.close()
-
