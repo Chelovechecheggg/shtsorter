@@ -5,18 +5,18 @@ Named "shtsorter" because "shtfinder" already exists but does something else
 ## Usage
 Open run.py to configure the search conditions.
 Description of all the available settings and search conditions is provided below <p>
+**search_name** is the name that will be given to all output files. <p>
 **makeheaders** function is used for making headers for output files. First argument should be the name of the run file
-("run.py" by default), and the second argument is the name of the output file (must match the *searchname* in the shot
-configuration below)
+("run.py" by default), and the second argument is the name of the output file (should be the search_name variable)<p>
 ***Shot*** class is created to read all data from a shot. Available parameters: <br>
 - **shtpath** - path to the folder that contains all the .sht files. If changed, also change it in the get_numbers function <br>
 - **unpack_method** - either "exe" or "shtripper". "exe" is used for faster file reading (~2-3s to read one .sht file),
 however not every data point is used<br>, which may lead to missing short spikes in the signal. "shtripper" reads all data points,
 however it takes ~2 minutes to read one .sht file.
-- **searchname** - string that will be used to name all output files. Must match *search_name* in the
+- **searchname** - string that will be used to name all output files. Should be the *search_name* variable. Must match *search_name* in the
 *make_headers* function.<p>
-**THE PROGRAM CLEARS OUTPUT FILES WITH THE SAME SEARCHNAME WHEN LAUNCHING. MAKE SURE TO SAVE ALL INFO THAT YOU NEED FROM
-THOSE FILES OR TO CHANGE THE SEARCHNAME BEFORE LAUNCHING THE PROGRAM AGAIN**<p>
+**THE PROGRAM CLEARS OUTPUT FILES WITH THE SAME SEARCH_NAME WHEN LAUNCHING. MAKE SURE TO SAVE ALL INFO THAT YOU NEED FROM
+THOSE FILES OR TO CHANGE THE SEARCH_NAME BEFORE LAUNCHING THE PROGRAM AGAIN**<p>
 
 ***search_time*** is used to set time interval relative to a signal from a diagnostic. Available parameters: <br>
 - **names** - names of the diagnostics to look for. Uses the first diagnostic that is found
