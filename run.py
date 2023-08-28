@@ -8,7 +8,9 @@ def main():
     unknowns_output = []
     used_exe = []
     # numbers = [42068]  # manual shot name input
-    numbers = get_numbers("./sht2")  # read all shot names from directory
+    numbers = get_numbers(path="./sht2",
+                          min_number=0,
+                          max_number=99999)
     for n in numbers:
         shot = Shot(number=n,
                     shtpath="./sht2",
