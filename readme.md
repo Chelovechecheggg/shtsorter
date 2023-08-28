@@ -3,7 +3,9 @@
 A script made for finding Globus-M2 tokamak shots that meet specific conditions.
 Named "shtsorter" because "shtfinder" already exists but does something else
 ## Usage
-Open run.py to configure the search conditions. <p>
+Open run.py to configure the search conditions. If you're using a run file with a name different than "run.py",
+change the argument of make_headers() (first line of main()) function to the current name of the run file. <p>
+Description of all the available settings and search conditions is provided below <p>
 ***Shot*** class is created to read all data from a shot. Available parameters: <br>
 - **shtpath** - path to the folder that contains all the .sht files. If changed, also change it in the get_numbers function <br>
 - **unpack_method** - either "exe" or "shtripper". "exe" is used for faster file reading (~2-3s to read one .sht file),
@@ -34,6 +36,20 @@ relative to a signal from a diagnostic signal specified in *search_time* <br>
 - Here multiple "Search" objects can be created and put in an array. In that case the program will look for
 shots that meets search conditions from all objects in an array. <br>
 - **filters** and **filt_arg** - read below
+
+The program creates four txt files when launched: *log.txt*, *output.txt*, *output_unk.txt*, *output_exe.txt*.
+Each file begins with a header containing the date and time of the program launch and all search settings used
+during that launch. *log.txt* file contains (mostly) everything that is displayed in the terminal: successes/failures 
+of each search condition, errors and warnings. Used mostly for debugging and is not cleared after each launch. 
+The *log.txt* file should be manually deleted/cleared from time to time. *output* contains the numbers of all the shot
+files that fit the conditions. *output_unk* is used for the cases when an error occurred when checking some
+of the search criteria, but there were no checks that the shot didn't pass. The shots end up in this
+folder very rarely, and they should be analyzed manually. *output_exe* is only used with *shtripper* unpack method.
+If an error occurs when unpacking with *shtripper* method (which sometimes happens for some reason),
+the *exe* method will be used instead. If then a shot passes all checks, it will be saved to *output_exe* file instead
+of *output*<p>
+**THE PROGRAM CLEARS ALL THE OUTPUT FILES WHEN LAUNCHING. MAKE SURE TO SAVE ALL INFO THAT YOU NEED FROM THOSE FILES
+BEFORE LAUNCHING THE PROGRAM AGAIN**
 ## Filters 
 Filters are used to search not only for signal values themselves, 
 but also for other information contained in a signal, like average values or rate of growth.
@@ -63,7 +79,7 @@ power of (respectively) the average value of signal from a different diagnostic 
 - **"stft_freq"** - computes short time Fourier transform of the signal and returns magnitude change over time of
 the signal on the given frequency
     - Argument: integer, the frequency mentioned above.
-    - **Should be used only with "shtripper" unpack method.** "exe" unpack method returns inconsistent data or errors
+    - **Should only be used with "shtripper" unpack method.** "exe" unpack method returns inconsistent data or errors
   due to low number of data points 
 - **"smooth"** - smoothes the signal using Savitzky-Golay algorithm
     - No arguments required: insert "none" as the argument 
