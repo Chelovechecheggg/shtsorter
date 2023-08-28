@@ -394,14 +394,15 @@ def make_output(search, shot, output, unknown, used_exe):
     return output, unknown, used_exe
 
 
-def get_numbers(path):
+def get_numbers(path, min_number, max_number):
     numbers = []
     files = [f for f in os.listdir(path)]
     print(files)
     for f in files:
         # print(f)
         # print(f[3:-4])
-        numbers.append(int(f[3:-4]))
+        if min_number < int(f[3:-4]) < max_number:
+            numbers.append(int(f[3:-4]))
     print(numbers)
     return numbers
 
