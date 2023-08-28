@@ -407,7 +407,7 @@ def get_numbers(path, min_number, max_number):
     return numbers
 
 
-def make_headers(runname,search_name):
+def make_headers(runname, search_name):
     try:
         os.remove(f"out/{search_name}output.txt")
         os.remove(f"out/{search_name}output_unk.txt")
@@ -427,13 +427,13 @@ def make_headers(runname,search_name):
             header_start = a
             break
     f_log.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
-    f_log.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_log.write(header[header_start:-484] + "\n" + " ====================================" + "\n")
     f_out.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
-    f_out.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_out.write(header[header_start:-484] + "\n" + " ====================================" + "\n")
     f_unk.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
-    f_unk.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_unk.write(header[header_start:-484] + "\n" + " ====================================" + "\n")
     f_exe.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
-    f_exe.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_exe.write(header[header_start:-484] + "\n" + " ====================================" + "\n")
     f_log.close()
     f_out.close()
     f_unk.close()

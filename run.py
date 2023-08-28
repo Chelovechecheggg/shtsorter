@@ -2,8 +2,9 @@ from shtsorter import *
 
 
 def main():
+    search_name = ""
     make_headers(runname="run.py",
-                 search_name="run_")
+                 search_name=search_name)
     output = []
     unknowns_output = []
     used_exe = []
@@ -15,7 +16,7 @@ def main():
         shot = Shot(number=n,
                     shtpath="./sht2",
                     unpack_method="exe",
-                    searchname="run_")
+                    searchname=search_name)
         search_time = Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='>',
