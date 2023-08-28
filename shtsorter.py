@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import scipy.stats
 import ripper as rp
 import statistics as st
 import scipy as sp
+from datetime import datetime
 
 
 class Shot:
@@ -70,6 +72,11 @@ class Shot:
             except Exception as e:
                 print(e)
                 print("In shot", self.number, "shtripper unpack method didnt work. Using exe method instead...")
+                f_log = open("log.txt", "a")
+                f_log.write(str(e) + "\n")
+                f_log.write("In shot " + str(self.number) + " shtripper unpack method didnt work. Using exe "
+                            "method instead..." + "\n")
+                f_log.close()
                 self.unpack_method = "exe"
                 self.ripper_fail_flag = 1
                 self.read()
@@ -101,6 +108,9 @@ class Shot:
                 data.append(self.data[col])
             except Exception as e:
                 print(e)
+                f_log = open("log.txt", "a")
+                f_log.write(str(e) + "\n")
+                f_log.close()
                 data.append(np.zeros([9, 4096]))
         return data
 
@@ -121,6 +131,7 @@ class Search:
         self.valid_id = 0
         self.time = time
         self.points = [0, 0]
+        self.f_log = open("log.txt", "a")
 
     def get_signal_start_time(self):
         try:
@@ -134,6 +145,9 @@ class Search:
         except Exception as e:
             print(e)
             print("Error in time search while reading shot file", self.shot.number, "Empty shot?")
+            self.f_log.write(repr(e) + "\n")
+            self.f_log.write("Error in time search while reading shot file" + repr(self.shot.number) + "Empty shot?"
+                             + "\n")
             return -1
 
     def do_search(self):
@@ -168,6 +182,7 @@ class Search:
                     decname = shotname
                 else:
                     print("incorrect unpack method in shot", self.shot.number)
+                    self.f_log.write("incorrect unpack method in shot" + repr(self.shot.number) + "\n")
                     decname = "E"
                 # print(name, decname, desname)
                 if decname == searchname:
@@ -179,6 +194,7 @@ class Search:
             i = 0
         if not self.ids:
             print("no such diagnostics, cry about it. In shot", self.shot.number)
+            self.f_log.write("no such diagnostics, cry about it. In shot" + repr(self.shot.number) + "\n")
 
     def set_time_borders(self):
         if self.time != [0, 0]:
@@ -198,6 +214,7 @@ class Search:
                 i = i + 1
             if self.time[1] > max(self.shot.data[self.valid_id][0]):
                 print("Given time is higher than shot duration in shot", self.shot.number)
+                self.f_log.write("Given time is higher than shot duration in shot" + repr(self.shot.number) + "\n")
         else:
             self.time = [0, max(self.shot.data[self.valid_id][0])]
             self.set_time_borders()
@@ -252,6 +269,8 @@ class Search:
                 if freq > max(stft_freq):
                     print("Warning during STFT in shot", self.shot.number, ": given frequency is larger than max"
                                                                            "stft frequency")
+                    self.f_log.write("Warning during STFT in shot " + str(self.shot.number) +
+                                     ": given frequency is larger than max stft frequency" + "\n")
                 stft_freq = abs(stft_freq-freq)
                 s_fr_min = 9999999
                 n_min = -1
@@ -264,10 +283,12 @@ class Search:
                 self.points[1] = len(self.processed_data)-1
                 if n_min == -1:
                     print("Error during STFT in shot", self.shot.number, "*very* invalid frequency given ")
+                    self.f_log.write("Error during STFT in shot " + str(self.shot.number) +
+                                     " *very* invalid frequency given" + "\n")
             elif f == "smooth":
                 self.processed_data = sp.signal.savgol_filter(x=self.processed_data,
-                                                             window_length=int(len(self.processed_data)/2),
-                                                             polyorder=4)
+                                                              window_length=int(len(self.processed_data)/2),
+                                                              polyorder=4)
 
     def check_condition(self):
         maximum = max(self.processed_data)
@@ -296,7 +317,6 @@ class Search:
                     self.res.append(1)
                     return
             self.res.append(0)
-
 
     def find_signal_start_time(self):
         i = 0
@@ -341,10 +361,14 @@ def mgd_print_test(shot, columns):
 
 def make_output(search, shot, output, unknown, used_exe):
     unk_flag = 0
+    f_output = open("output.txt", "a")
+    f_unk = open("output_unk.txt", "a")
+    f_exe = open("output_exe.txt", "a")
     for s in search:
         try:
             s.do_search()
             print(s.res, shot.number)
+            s.f_log.write(repr(s.res) + " " + repr(shot.number) + "\n")
             if s.res == [1]:
                 pass
             elif s.res == [-1]:
@@ -354,13 +378,18 @@ def make_output(search, shot, output, unknown, used_exe):
         except Exception as e:
             print(e)
             print("Error during search while reading shot file", shot.number, "Empty shot?")
+            s.f_log.write(repr(e) + "\n")
+            s.f_log.write("Error during search while reading shot file" + repr(shot.number) + "Empty shot?" + "\n")
             unk_flag = -1
     if unk_flag == 0 and shot.ripper_fail_flag == 0:
         output.append(shot.number)
+        f_output.write(repr(shot.number) + "\n")
     elif unk_flag == 1 and shot.ripper_fail_flag == 0:
         unknown.append(shot.number)
+        f_unk.write(repr(shot.number) + "\n")
     elif shot.ripper_fail_flag == 1:
         used_exe.append(shot.number)
+        f_exe.write(repr(shot.number) + "\n")
     return output, unknown, used_exe
 
 
@@ -374,3 +403,37 @@ def get_numbers(path):
         numbers.append(int(f[3:-4]))
     print(numbers)
     return numbers
+
+
+def make_headers(runname):
+    try:
+        os.remove("output.txt")
+        os.remove("output_unk.txt")
+        os.remove("output_exe.txt")
+    except:
+        pass
+
+    f_log = open("log.txt", "a")
+    f_out = open("output.txt", "a")
+    f_unk = open("output_unk.txt", "a")
+    f_exe = open("output_exe.txt", "a")
+    f_run = open(runname, "r")
+    header = f_run.read()
+    header_start = 0
+    for a in range(len(header)):
+        if header[a] == "S" and header[a+1] == "h" and header[a+2] == "o" and header[a+3] == "t":
+            header_start = a
+            break
+    f_log.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
+    f_log.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_out.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
+    f_out.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_unk.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
+    f_unk.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_exe.write("========================= Launch as of " + str(datetime.now()) + " =========================" + "\n")
+    f_exe.write(header[header_start:-467] + "\n" + " ====================================" + "\n")
+    f_log.close()
+    f_out.close()
+    f_unk.close()
+    f_exe.close()
+
