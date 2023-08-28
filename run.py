@@ -2,7 +2,8 @@ from shtsorter import *
 
 
 def main():
-    make_headers("run.py")
+    make_headers(runname="run.py",
+                 search_name="run_")
     output = []
     unknowns_output = []
     used_exe = []
@@ -11,7 +12,8 @@ def main():
     for n in numbers:
         shot = Shot(number=n,
                     shtpath="./sht2",
-                    unpack_method="exe")
+                    unpack_method="exe",
+                    searchname="run_")
         search_time = Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='>',
@@ -99,7 +101,7 @@ def main():
             output, unknowns_output, used_exe = make_output(search, shot, output, unknowns_output, used_exe)
         else:
             print("no emission found", shot.number)
-            f_log = open("log.txt", "a")
+            f_log = open(f"out/{shot.search_name}log.txt", "a")
             f_log.write("no emission found" + " " + repr(shot.number) + "\n")
             f_log.close()
     print("fits all:", output)
