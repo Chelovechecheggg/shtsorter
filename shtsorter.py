@@ -6,6 +6,7 @@ import ripper as rp
 import statistics as st
 import scipy as sp
 from datetime import datetime
+import shtRipper as rp_but_cooler
 
 
 class Shot:
@@ -18,8 +19,9 @@ class Shot:
         self.unit = []
         self.data = []
         self.ripper_fail_flag = 0
-        self.read()
         self.search_name = str(searchname)
+        self.read()
+
 
     def read(self):
         if self.unpack_method == "exe":
@@ -63,13 +65,18 @@ class Shot:
                 self.info = []
                 self.unit = []
                 self.data = []
-                var = rp.extract(self.shtpath, self.number)
-                for key in var:
-                    self.names.append(var[key]["name"])
-                    self.info.append(var[key]["comm"])
+                #var = rp.extract(self.shtpath, self.number)
+                var = rp_but_cooler.ripper.read(self.shtpath + "/sht" + str(self.number) + ".SHT")
+                #print(var.keys())
+                if var == {}:
+                    raise ValueError('Empty shot ', self.number)
+                for key in var.keys():
+                    self.names.append(key)
+                    self.info.append(var[key]["comment"])
                     self.unit.append(var[key]["unit"])
-                    oscillo = np.asarray(rp.x_y(var[key]))
-                    self.data.append(oscillo)
+                    #oscillo = np.asarray(rp.x_y(var[key]))
+                    #self.data.append(oscillo)
+                    self.data.append([var[key]['x'],var[key]['y']])
             except Exception as e:
                 print(e)
                 print("In shot", self.number, "shtripper unpack method didnt work. Using exe method instead...")
@@ -117,7 +124,7 @@ class Shot:
 
 
 class Search:
-    def __init__(self, shot, names, cond, cond_val, filters, filt_arg, noise_val, time):
+    def __init__(self, shot, names, cond, cond_val, filters, filt_arg, noise_val, time, or_group):
         self.diagnames = names
         self.cond = cond
         self.cond_val = cond_val
@@ -133,6 +140,7 @@ class Search:
         self.time = time
         self.points = [0, 0]
         self.f_log = open(f"out/{shot.search_name}log.txt", "a")
+        self.or_group = or_group
 
     def get_signal_start_time(self):
         try:
@@ -265,7 +273,20 @@ class Search:
             elif f == "stft_freq":
                 freq = f_arg[0]
                 stft_freq, t, zxx = sp.signal.stft(x=self.processed_data, nperseg=f_arg[1], noverlap=f_arg[2],
-                                                   nfft=f_arg[3], fs=f_arg[4])
+                                                   nfft=f_arg[3], fs=f_arg[4], scaling= f_arg[5])
+
+                '''plt.figure(figsize=(19, 11))
+                cmap = plt.colormaps["jet"]
+                plt.pcolormesh(t, stft_freq, abs(zxx), vmin=0,
+                               vmax=np.max(abs(zxx)) * 0.98, cmap=cmap)
+                plt.title(f'STFT MHD. Power spectral density\n' + f'Shot #, Selected burst  ms',
+                          fontsize=20)
+                plt.ylabel('Frequency, kHz', fontsize=18)
+                plt.xlabel('Time, ms', fontsize=18)
+                #plt.ylim(f_window[0], f_window[1])
+                #plt.xlim(time_window[0], time_window[1])
+                plt.colorbar()
+                plt.show()'''
                 # print(zxx)
                 if freq > max(stft_freq):
                     print("Warning during STFT in shot", self.shot.number, ": given frequency is larger than max"
@@ -362,27 +383,41 @@ def mgd_print_test(shot, columns):
 
 def make_output(search, shot, output, unknown, used_exe):
     unk_flag = 0
+    last_or_group = -1
+    last_res = -2
     f_output = open(f"out/{shot.search_name}output.txt", "a")
     f_unk = open(f"out/{shot.search_name}output_unk.txt", "a")
     f_exe = open(f"out/{shot.search_name}output_exe.txt", "a")
     for s in search:
         try:
+            if s.or_group == last_or_group:
+                if last_res == 1:
+                    continue
+                else:
+                    pass
+            else:
+                if last_res == 0:
+                    return output, unknown, used_exe
+            last_or_group = s.or_group
             s.do_search()
             print(s.res, shot.number)
             s.f_log.write(repr(s.res) + " " + repr(shot.number) + "\n")
             if s.res == [1]:
+                last_res = 1
                 pass
             elif s.res == [-1]:
                 unk_flag = 1
+                last_res = -1
             else:
-                return output, unknown, used_exe
+                last_res = 0
+                #return output, unknown, used_exe
         except Exception as e:
             print(e)
             print("Error during search while reading shot file", shot.number, "Empty shot?")
             s.f_log.write(repr(e) + "\n")
             s.f_log.write("Error during search while reading shot file" + repr(shot.number) + "Empty shot?" + "\n")
             unk_flag = -1
-    if unk_flag == 0 and shot.ripper_fail_flag == 0:
+    if unk_flag == 0 and shot.ripper_fail_flag == 0 and last_res != 0:
         output.append(shot.number)
         f_output.write(repr(shot.number) + "\n")
     elif unk_flag == 1 and shot.ripper_fail_flag == 0:
@@ -412,7 +447,8 @@ def make_headers(runname, search_name):
         os.remove(f"out/{search_name}output.txt")
         os.remove(f"out/{search_name}output_unk.txt")
         os.remove(f"out/{search_name}output_exe.txt")
-    except:
+    except Exception as e:
+        print(e)
         pass
 
     f_log = open(f"out/{search_name}log.txt", "a")

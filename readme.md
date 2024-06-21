@@ -29,6 +29,7 @@ values of a signal in a diagnostic is less than **noise_val** for the entire dur
 not use the diagnostic.<br>
 - **time** - time interval in which the program looks for a signal. in *search_time* should be set to [0,0] <br>
 - **filters** and **filt_arg** - are not used in *search_time*
+- **or_group** - isn't used in *search_time*, leave at 1
 
 ***search*** is used to actually set the search conditions. Available parameters: <br>
 - **names** - same as in *search_time*
@@ -42,6 +43,7 @@ relative to a signal from a diagnostic signal specified in *search_time* <br>
 - Here multiple "Search" objects can be created and put in an array. In that case the program will look for
 shots that meets search conditions from all objects in an array. <br>
 - **filters** and **filt_arg** - read below
+- **or_group** - ill write an explanation later
 
 The program creates four txt files when launched: *log.txt*, *output.txt*, *output_unk.txt*, *output_exe.txt*.
 Each file begins with a header containing the date and time of the program launch and all search settings used
@@ -83,7 +85,7 @@ power of (respectively) the average value of signal from a different diagnostic 
   valid(existing with non-noise signal) diagnostic in the list
 - **"stft_freq"** - computes short time Fourier transform of the signal and returns magnitude change over time of
 the signal on the given frequency
-    - Argument: integer, the frequency mentioned above.
+    - Argument: integer, the frequency mentioned above. (thats incorrect, there's 5 arguments)
     - **Should only be used with "shtripper" unpack method.** "exe" unpack method returns inconsistent data or errors
   due to low number of data points 
 - **"smooth"** - smoothes the signal using Savitzky-Golay algorithm
