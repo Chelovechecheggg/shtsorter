@@ -11,8 +11,9 @@ Description of all the available settings and search conditions is provided belo
 ***Shot*** class is created to read all data from a shot. Available parameters: <br>
 - **shtpath** - path to the folder that contains all the .sht files. If changed, also change it in the get_numbers function <br>
 - **unpack_method** - either "exe" or "shtripper". "exe" is used for faster file reading (~2-3s to read one .sht file),
-however not every data point is used<br>, which may lead to missing short spikes in the signal. "shtripper" reads all data points,
-however it takes ~2 minutes to read one .sht file.
+however not every data point is used, which may lead to missing short spikes in the signal. "shtripper" reads all data points,
+ ~~however it takes around 2 minutes to read one .sht file.~~ Now that im using an up-to-date version of shtripper, it is much faster
+and there's no point to use "exe" instead of "shtripper". "exe" is left as a legacy option or if "shtriper" doesn't work for some reason
 - **searchname** - string that will be used to name all output files. Should be the *search_name* variable. Must match *search_name* in the
 *make_headers* function.<p>
 **THE PROGRAM CLEARS OUTPUT FILES WITH THE SAME SEARCH_NAME WHEN LAUNCHING. MAKE SURE TO SAVE ALL INFO THAT YOU NEED FROM
@@ -29,6 +30,7 @@ values of a signal in a diagnostic is less than **noise_val** for the entire dur
 not use the diagnostic.<br>
 - **time** - time interval in which the program looks for a signal. in *search_time* should be set to [0,0] <br>
 - **filters** and **filt_arg** - are not used in *search_time*
+- **or_group** - isn't used in *search_time*, leave at 1
 
 ***search*** is used to actually set the search conditions. Available parameters: <br>
 - **names** - same as in *search_time*
@@ -42,6 +44,11 @@ relative to a signal from a diagnostic signal specified in *search_time* <br>
 - Here multiple "Search" objects can be created and put in an array. In that case the program will look for
 shots that meets search conditions from all objects in an array. <br>
 - **filters** and **filt_arg** - read below
+- **or_group** - If multiple searches are created and you want to find the shot that satisfies any one of the searches,
+set their or_group to the same number. Otherwise the numbers of each search should be different. Note that since i'm bad
+at programming searches with the same or_group **MUST** go one after another in the list. So five searches with or_groups 
+1,2,2,3,4 will search for shots where first&(second or third)&4th&5th conditions are satisfied, but or_groups 1,2,3,2,4
+will not do that and will serach for shots where every condition is satisfied.
 
 The program creates four txt files when launched: *log.txt*, *output.txt*, *output_unk.txt*, *output_exe.txt*.
 Each file begins with a header containing the date and time of the program launch and all search settings used
@@ -83,7 +90,9 @@ power of (respectively) the average value of signal from a different diagnostic 
   valid(existing with non-noise signal) diagnostic in the list
 - **"stft_freq"** - computes short time Fourier transform of the signal and returns magnitude change over time of
 the signal on the given frequency
-    - Argument: integer, the frequency mentioned above.
+    - Argument: list with 7 values. The first is the frequency mentioned above, values 2-6 are the arguments *"nperseg"*, *"noverlap"*,
+*"nfft"*, *"fs"*, *"scaling"* for scipy.signal.stft, respectively. The last argument is either a 1 or a 0, if set to 1
+pictures of stfts will be saved to out/images for shots that passed all checks (shots that are in the out.txt folder)
     - **Should only be used with "shtripper" unpack method.** "exe" unpack method returns inconsistent data or errors
   due to low number of data points 
 - **"smooth"** - smoothes the signal using Savitzky-Golay algorithm

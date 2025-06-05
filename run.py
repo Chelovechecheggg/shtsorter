@@ -2,20 +2,20 @@ from shtsorter import *
 
 
 def main():
-    search_name = ""
+    search_name = "3"
     make_headers(runname="run.py",
                  search_name=search_name)
     output = []
     unknowns_output = []
     used_exe = []
-    # numbers = [42068]  # manual shot name input
+    #numbers = [42018,42155,42156,42164,42165,42736]  # manual shot name input
     numbers = get_numbers(path="./sht2",
-                          min_number=0,
+                          min_number=42430,
                           max_number=99999)
     for n in numbers:
         shot = Shot(number=n,
                     shtpath="./sht2",
-                    unpack_method="exe",
+                    unpack_method="shtripper",
                     searchname=search_name)
         search_time = Search(shot=shot,
                              names=["Emission electrode current"],
@@ -24,7 +24,8 @@ def main():
                              filters=[],
                              filt_arg=[],
                              noise_val=10,
-                             time=[0, 0])  # input [0,0] to search over entire signal
+                             time=[0, 0],
+                             or_group=1)  # input [0,0] to search over entire signal
         t_0 = search_time.get_signal_start_time()
         if t_0 != -1:
             search = [Search(shot=shot,
@@ -39,11 +40,12 @@ def main():
                                     "МГД быстрый зонд тор.", "МГД быстрый зонд верт.", "МГД быстрый зонд рад.",
                                     "МГД быстрый зонд тор. ", "МГД быстрый зонд верт. ", "МГД быстрый зонд рад. "],
                              cond='<',
-                             cond_val=0.3,
+                             cond_val=0.6,
                              filters=["abs"],
                              filt_arg=["none"],
-                             noise_val=0.3,
-                             time=[t_0, t_0 + 0.020]),
+                             noise_val=0.6,
+                             time=[t_0, t_0 + 0.010],
+                             or_group=1),
                       Search(shot=shot,
                              names=["Ip новый (Пр1ВК) (инт.16)", "Ip внутр.(Пр2ВК) (инт.18)",
                                     "Ip+Ivv нар.(Пр1ВК) (инт.16)",
@@ -53,7 +55,8 @@ def main():
                              noise_val=0.0,
                              filters=["diff"],
                              filt_arg=["none"],
-                             time=[t_0, t_0 + 0.020]),
+                             time=[t_0, t_0 + 0.010],
+                             or_group=2),
                       Search(shot=shot,
                              names=["Лазер", "Лазер ", "Лазер  "],
                              cond='<once',
@@ -61,17 +64,19 @@ def main():
                              noise_val=0.0,
                              filters=[],
                              filt_arg=[],
-                             time=[t_0, t_0 + 0.020]),
+                             time=[t_0, t_0 + 0.010],
+                             or_group=3),
                       Search(shot=shot,
                              names=["МГД наружный", "МГД наружный  ", "МГД наружный   ", "МГД наружный    ",
                                     "МГД наружный     ", "МГД наружный      ", "МГД наружный       ",
                                     "МГД наружный        ", ],
                              cond='<',
-                             cond_val=0.3,
+                             cond_val=0.7,
                              filters=["abs"],
                              filt_arg=["none"],
                              noise_val=0.3,
-                             time=[t_0, t_0 + 0.020]),
+                             time=[t_0, t_0 + 0.010],
+                             or_group=4),
 
                       Search(shot=shot,
                              names=["Ip новый (Пр1ВК) (инт.16)", "Ip внутр.(Пр2ВК) (инт.18)",
@@ -82,15 +87,17 @@ def main():
                              noise_val=0.3,
                              filters=[],
                              filt_arg=[],
-                             time=[t_0, t_0 + 0.020]),
+                             time=[t_0, t_0 + 0.010],
+                             or_group=5),
                       Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='>',
-                             cond_val=3,
-                             noise_val=3,
+                             cond_val=1,
+                             noise_val=1,
                              filters=[],
                              filt_arg=[],
-                             time=[t_0, t_0 + 0.020]),
+                             time=[t_0, t_0 + 0.010],
+                             or_group=6),
                       Search(shot=shot,
                              names=["Emission electrode current"],
                              cond='<',
@@ -98,7 +105,8 @@ def main():
                              noise_val=0,
                              filters=["+", "avg", "/diagn_avg"],
                              filt_arg=[9.995, "none", "Emission electrode voltage"],
-                             time=[t_0, t_0 + 0.020])
+                             time=[t_0, t_0 + 0.010],
+                             or_group=7) #Hydrogen emission check
                       ]
 
             output, unknowns_output, used_exe = make_output(search, shot, output, unknowns_output, used_exe)
