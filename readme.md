@@ -48,7 +48,7 @@ shots that meets search conditions from all objects in an array. <br>
 set their or_group to the same number. Otherwise the numbers of each search should be different. Note that since i'm bad
 at programming searches with the same or_group **MUST** go one after another in the list. So five searches with or_groups 
 1,2,2,3,4 will search for shots where first&(second or third)&4th&5th conditions are satisfied, but or_groups 1,2,3,2,4
-will not do that and will serach for shots where every condition is satisfied.
+will not do that and will search for shots where every condition is satisfied.
 
 The program creates four txt files when launched: *log.txt*, *output.txt*, *output_unk.txt*, *output_exe.txt*.
 Each file begins with a header containing the date and time of the program launch and all search settings used
